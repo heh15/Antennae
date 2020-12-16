@@ -49,16 +49,11 @@ GMC_dec = -(18*u.degree + 52*u.arcmin + 31.8*u.arcsec)
 SC_ra = 15*(12*u.degree + 1*u.arcmin + 55*u.arcsec)
 SC_dec = -(18*u.degree + 52*u.arcmin + 51*u.arcsec)
   
-# beamra=204*u.degree+58*u.arcmin+30*u.arcsec
-# beamdec=50*u.arcmin+3*u.arcsec
-# beamposition=SkyCoord(dec=beamdec,ra=beamra,frame='icrs')
-# 
-# beammajor=1.986*u.arcsec/2.0
-# beamminor=1.576*u.arcsec/2.0
-# pa=-71*u.degree
- 
+
 datatypes = ['band3_GMC', 'band3_SC', 'band6_GMC', 'band7_SC', 'band3_GMC_zoom', 
             'band3_SC_zoom', 'band3_GMC_overlay', 'band6_GMC_zoom', 'band7_SC_zoom']
+
+datatypes = ['band3_GMC', 'band3_SC', 'band6_GMC', 'band7_SC']
 parameters = ['imagename']
 continuum = dict.fromkeys(datatypes)
 for key in continuum.keys():
@@ -70,11 +65,11 @@ continuum['band3_GMC']['vmax'] = 1.18e-4
 continuum['band3_GMC']['vmin'] = 2*1.2e-5
 continuum['band3_GMC']['color_scheme'] = 'viridis'
 
-# continuum image for band 3 GMC zoom-in 
-continuum['band3_GMC_zoom'] = continuum['band3_GMC']
-
-# continuum image for band 3 GMC overlay
-continuum['band3_GMC_overlay'] = continuum['band3_GMC']
+# # continuum image for band 3 GMC zoom-in 
+# continuum['band3_GMC_zoom'] = continuum['band3_GMC']
+# 
+# # continuum image for band 3 GMC overlay
+# continuum['band3_GMC_overlay'] = continuum['band3_GMC']
 
 # continuum image for Band 3 SC data
 continuum['band3_SC']['imagename'] = cont_Band3_SC
@@ -82,8 +77,8 @@ continuum['band3_SC']['vmax'] = 1.4e-4
 continuum['band3_SC']['vmin'] = 2*1.4e-5
 continuum['band3_SC']['color_scheme'] = 'viridis'
 
-# continuum image for band 3 SC zoom-in
-continuum['band3_SC_zoom'] = continuum['band3_SC']
+# # continuum image for band 3 SC zoom-in
+# continuum['band3_SC_zoom'] = continuum['band3_SC']
 
 # continuum image for Band 6 GMC data
 continuum['band6_GMC']['imagename'] = cont_Band6_GMC
@@ -91,8 +86,8 @@ continuum['band6_GMC']['vmax'] = 5.24e-4
 continuum['band6_GMC']['vmin'] = 2*5.3e-5
 continuum['band6_GMC']['color_scheme'] = 'hot'
 
-# continuum image for band 6 zoom-in
-continuum['band6_GMC_zoom'] = continuum['band6_GMC']
+# # continuum image for band 6 zoom-in
+# continuum['band6_GMC_zoom'] = continuum['band6_GMC']
 
 # continuum image for Band 7 SC data
 continuum['band7_SC']['imagename'] = cont_Band7_SC
@@ -100,8 +95,8 @@ continuum['band7_SC']['vmax'] = 4.2e-4
 continuum['band7_SC']['vmin'] = 2*4.1e-5
 continuum['band7_SC']['color_scheme'] = 'hot'
 
-# continuum image for band 7 zoom-in
-continuum['band7_SC_zoom'] = continuum['band7_SC']
+# # continuum image for band 7 zoom-in
+# continuum['band7_SC_zoom'] = continuum['band7_SC']
 
 # regions to zoom in
 region_labels = ['a', 'b', 'c']
@@ -177,6 +172,14 @@ zoom_data = ['band3_GMC_zoom', 'band3_SC_zoom','band6_GMC_zoom',
             'band7_SC_zoom']
 overlay_data = ['band3_GMC_overlay']
 
+GMC = ['band3_GMC', 'band6_GMC']
+SC = ['band3_SC', 'band6_SC']
+
+overlay_CO = True
+overlay_FOV = True
+overlay_Rcluster = True
+draw_region = True
+
 for data in datatypes:
     # import image and cut the image. 
     fitsimage = continuum[data]['imagename']
@@ -198,15 +201,11 @@ for data in datatypes:
         elif data in band7_SC:
             size = u.Quantity((0.7, 0.7), u.arcmin)
     wcs_cut, cont_image_cut = cut_2d(cont_image, position, size, wcs) 
-  
+    
+    pictureName = 'ngc40389_' + data + '.png' 
+ 
     fig = plt.figure(figsize=[10,10], dpi=120)
-    ax = plt.subplot(111, projection=wcs_cut)
-        
-    # x, y = wcs_cut.wcs_world2pix(testra, testdec, 1)
-    # props = dict(facecolor='white', alpha=0.5, edgecolor='None')
-    # plt.text(x, y, galaxy + ' ' + linelabel, fontsize=15, bbox=props)
-    # 
-    # ax.tick_params(labelsize=8, direction='in')
+    ax = plt.subplot(111, projection=wcs_cut) 
 
     # give the default value for vmax and vmin
     gamma = 1.0
@@ -222,14 +221,13 @@ for data in datatypes:
                     vmin=continuum[data]['vmin'],
                     vmax=continuum[data]['vmax'], 
                     origin='lower',
-                    cmap=continuum[data]['color_scheme'])
-    
+                    cmap=continuum[data]['color_scheme'])    
     ax.set_xlabel('J2000 Right Ascension')
     ax.set_ylabel('J2000 Declination')
     ax.set_xlim(0, np.shape(cont_image_cut)[0])
     ax.set_ylim(0, np.shape(cont_image_cut)[1])
     
-    if data in GMC:
+    if overlay_CO == True: 
         co_mom0_file = Dir + 'ngc4038co.fits'
         wcs_co, data_co = fits_import(co_mom0_file)
         co_contour, footpring = reproject_interp((data_co, wcs_co),
@@ -238,62 +236,28 @@ for data in datatypes:
         levels = 90.6*np.array([0.01, 0.016, 0.025, 0.04, 0.06, 0.095, 0.15, 0.23, 0.37, 0.57])
         ax.contour(co_contour, levels=levels, colors='white', linewidths=0.2,
                    origin='lower')
-     
-    if data == 'band3_GMC': 
-        ra = SC_ra
-        dec = SC_dec
-        position = SkyCoord(dec=dec, ra=ra, frame='icrs')
-        FOV_2016 = SkyCircularAperture(position, r=0.765*u.arcmin)
-        FOV_2016_pix = FOV_2016.to_pixel(wcs_cut)
-        FOV_2016_pix.plot(color='red', clip_on=False)
-    if data == 'band6_GMC':
-        band7_pbimage = SC_dir + 'Band3/'\
-                      'ngc40389overlap_band7_range_robust_2_pb.fits'
-        wcs_pb, data_pb = fits_import(band7_pbimage)
-        levels = [0.21]
-        contour, footprint = reproject_interp((data_pb, wcs_pb), 
-                                               wcs_cut, 
-                                               shape_out=np.shape(cont_image_cut))        
-        ax.contour(contour, levels=levels,colors='red', linewidths=2.0) 
-    # save the figure
-    if (data in zoom_data) or (data in overlay_data):
-        print('zoom image')
-        fig.subplots_adjust(bottom = 0)
-        fig.subplots_adjust(top = 1)
-        fig.subplots_adjust(right = 1)
-        fig.subplots_adjust(left = 0)
-        plt.savefig(picDir+'ngc40389_'+data+'.png', dpi=np.shape(cont_image_cut)[0]/10)
-    else:
-        plt.savefig(picDir+'ngc40389_'+data+'.png')
-        
-    # draw the shape for different regions
-    if data in zoom_data:
-        for key in zooms.keys():
-            image = np.flipud(plt.imread(picDir+'ngc40389_'+data+'.png'))
-            fig = plt.figure(figsize=(10,10))
-            ax = plt.subplot(111, projection=wcs_cut)
-            ax.imshow(image)
-            aperture = zooms[key]['aperture'].to_pixel(wcs_cut)
-            shape = aperture.plot(color = 'red')
-            plt.savefig(picDir+'ngc40389_'+data+'_'+key+'.png')
-    # cut the image out 
-    if data in zoom_data: 
-        for key in zooms.keys():
-            region_wcs, region_data = cut_2d(cont_image_cut.data, zooms[key]['position'],
-                                             zooms[key]['size'], wcs_cut)
-            print(np.mean(region_data))
-            outputfits = imageDir + key + '_'+data+'.fits' 
-            header = region_wcs.to_header()
-            hdu = fits.PrimaryHDU(region_data.data, header)
-            hdu.writeto(outputfits, overwrite=True)
-            fig = plt.figure()
-            ax = plt.subplot('111', projection=region_wcs)
-            ax.imshow(region_data, origin='lower', 
-                      vmax=continuum[data]['vmax'],
-                      vmin=continuum[data]['vmin'])
-            plt.savefig(picDir+key+'_'+data+'.png')
-    # overlay the R cluster position on the maps of the GMC images. 
-    if data in overlay_data:
+        pictureName = pictureName.replace('.png', '_CO2-1.png')        
+
+    if overlay_FOV == True:  
+        if data == 'band3_GMC': 
+            ra = SC_ra
+            dec = SC_dec
+            position = SkyCoord(dec=dec, ra=ra, frame='icrs')
+            FOV_2016 = SkyCircularAperture(position, r=0.765*u.arcmin)
+            FOV_2016_pix = FOV_2016.to_pixel(wcs_cut)
+            FOV_2016_pix.plot(color='red', clip_on=False)
+        if data == 'band6_GMC':
+            band7_pbimage = SC_dir + 'Band3/'\
+                          'ngc40389overlap_band7_range_robust_2_pb.fits'
+            wcs_pb, data_pb = fits_import(band7_pbimage)
+            levels = [0.21]
+            contour, footprint = reproject_interp((data_pb, wcs_pb), 
+                                                   wcs_cut, 
+                                                   shape_out=np.shape(cont_image_cut))        
+            ax.contour(contour, levels=levels,colors='red', linewidths=2.0)
+        pictureName = pictureName.replace('.png', '_FOV.png')
+
+    if overlay_Rcluster == True: 
         # import the R cluster coordinates
         RSC_cat = pd.read_csv(logDir+'Rclusters_Zhang2001.csv', 
                                index_col = 0, header=None)
@@ -302,14 +266,33 @@ for data in datatypes:
         positions = SkyCoord(ra = ras, dec = decs)
         aper = SkyCircularAperture(positions, 0.15*u.arcsec)
         aper_pix = aper.to_pixel(wcs_cut)
-        # import the image
-        image = np.flipud(plt.imread(picDir+'ngc40389_'+data+'.png'))
-        fig = plt.figure(figsize=(10,10))
-        ax = plt.subplot(111, projection=wcs_cut)
-        ax.imshow(image)
         aper_pix.plot(color='white')
-        plt.savefig(picDir+'ngc40389_'+data+'_SCs.png')
- 
-# Overlay band7 or band 6 contour on band 3 data
-# filelists = 
- 
+        pictureName = pictureName.replace('.png', '_Rcluster.png')
+
+    if draw_region == True:
+        for key in zooms.keys():
+            aperture = zooms[key]['aperture'].to_pixel(wcs_cut)
+            aperture.plot(color='red') 
+            pictureName = pictureName.replace('.png', '_'+key+'.png')
+            plt.savefig(picDir+pictureName)
+            ax.patches[-1].remove()
+            pictureName = pictureName.replace('_'+key+'.png', '.png')
+    else:
+        plt.savefig(picDir+pictureName)
+
+
+# # cut out individual regions for each cluster. 
+# for data in datatypes:
+#     fitsimage = continuum[data]['imagename']
+#     wcs = fits_import(fitsimage)[0]
+#     cont_image = fits_import(fitsimage)[1]
+#     # cut the image out 
+#     if data in zoom_data: 
+#         for key in zooms.keys():
+#             region_wcs, region_data = cut_2d(cont_image.data, zooms[key]['position'],
+#                                              zooms[key]['size'], wcs)
+#             outputfits = imageDir + key + '_'+data+'.fits' 
+#             header = region_wcs.to_header()
+#             hdu = fits.PrimaryHDU(region_data.data, header)
+#             hdu.writeto(outputfits, overwrite=True)
+
