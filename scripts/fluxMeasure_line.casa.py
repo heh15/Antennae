@@ -6,8 +6,8 @@ import copy
 Dir = '/home/heh15/research/Antennae/'
 scriptDir = Dir + 'scripts/'
 regionDir = Dir + 'regions/'
-imagefile_co = Dir + 'mollyFinn/Antennae_12CO21.mom0'
-imagefile_co_cube = Dir + 'mollyFinn/Ant_B6high_Combined_12CO2_1.cube.image.fits'
+imagefile_co = Dir + 'mollyFinn/Antennae_12CO21_pbcor.mom0'
+imagefile_co_cube = Dir + 'mollyFinn/Ant_B6high_Combined_12CO2_1.cube.pbcor'
 sourcefile_band3_2016 = regionDir + 'source_band3_2016_imfit.crtf'
 
 ###########################################################
@@ -61,48 +61,56 @@ def band3_2016_sort(lst):
     return lst
 
 def measure_flux(linedict, statdict, measure_cube=False,
-                chans = '0', chan_num = 0):
+                chans = '0', chan_num = 0, pbimage=''):
     with open (linedict['region'], 'r') as infile:
         fittedRegions = infile.readlines()
-    
+
     fittedRegions.pop(0)
     fittedRegions = [line.strip('\n') for line in fittedRegions]
-   
+
     # get the statistics for different regions.
-    result = {} 
+    result = {}
     result['flux'] = []
     result['flux uncertainty'] = []
     result['peak intensity'] = []
+    result['pbcor'] = []
 
     for i in range(len(fittedRegions)):
         fittedRegion = fittedRegions[i]
+
         if measure_cube == True:
-            rms_cube = statdict['rms'] / np.sqrt(80)
-            mask = "'" + linedict['imagename'] + "'" + '>' + str(2*rms_cube)
             stats_all = imstat(imagename=linedict['imagename'],
-                                region=fittedRegion, chans=chans[i], 
-                                mask=mask)
+                                region=fittedRegion, chans=chans[i])
             rms = statdict['rms'] * np.sqrt(chan_num[i]/80.0)
         else:
             stats_all = imstat(imagename=linedict['imagename'],
                                 region=fittedRegion)
             rms = statdict['rms']
+
         if (stats_all is None) or (len(stats_all['flux'])==0):
             print('region '+ fittedRegion + ' is outside the field of view')
             result['flux'].append(np.nan)
             result['peak intensity'].append(np.nan)
             result['flux uncertainty'].append(np.nan)
+            result['pbcor'].append(np.nan)
             continue
+
+        # the pb correction value for each aperture
+        if pbimage == '':
+            pbcor = 1
+        else:
+            pbcor = imstat(imagename=pbimage,
+                           region=fittedRegion)['mean'][0]
 
         flux = stats_all['flux'][0]
         peak = stats_all['max'][0]
         pix_num = stats_all['npts'][0]
         pix_pbeam = statdict['pix/beam']
-        pbcor = 1.0
         flux_uncertainty = rms/pbcor*sqrt(pix_num/pix_pbeam)
         result['flux'].append(round_sig(flux))
         result['peak intensity'].append(round_sig(peak))
         result['flux uncertainty'].append(round_sig(flux_uncertainty, sig=1))
+        result['pbcor'].append(round_sig(pbcor, sig=2))
 
     return result
 

@@ -87,7 +87,7 @@ statistics['band7_2016_p5'] = copy.deepcopy(statistic)
 # functions
 
 def measure_flux(linedict, statdict, measure_cube=False,
-                chans = '0', chan_num = 0):
+                chans = '0', chan_num = 0, pbimage=''):
     with open (linedict['region'], 'r') as infile:
         fittedRegions = infile.readlines()
     
@@ -99,9 +99,11 @@ def measure_flux(linedict, statdict, measure_cube=False,
     result['flux'] = []
     result['flux uncertainty'] = []
     result['peak intensity'] = []
+    result['pbcor'] = []
 
     for i in range(len(fittedRegions)):
         fittedRegion = fittedRegions[i]
+
         if measure_cube == True:
             stats_all = imstat(imagename=linedict['imagename'],
                                 region=fittedRegion, chans=chans[i])
@@ -110,22 +112,32 @@ def measure_flux(linedict, statdict, measure_cube=False,
             stats_all = imstat(imagename=linedict['imagename'],
                                 region=fittedRegion)
             rms = statdict['rms']
+
         if (stats_all is None) or (len(stats_all['flux'])==0):
             print('region '+ fittedRegion + ' is outside the field of view')
             result['flux'].append(np.nan)
             result['peak intensity'].append(np.nan)
             result['flux uncertainty'].append(np.nan)
+            result['pbcor'].append(np.nan)
             continue
+
+        # the pb correction value for each aperture
+        if pbimage == '':
+            pbcor = 1
+        else:
+            pbcor = imstat(imagename=pbimage, 
+                           region=fittedRegion)['mean'][0]
+
         flux = stats_all['flux'][0]
         peak = stats_all['max'][0]
         pix_num = stats_all['npts'][0]
         pix_pbeam = statdict['pix/beam']
-        pbcor = 1.0
         flux_uncertainty = rms/pbcor*sqrt(pix_num/pix_pbeam)
         result['flux'].append(round_sig(flux))
         result['peak intensity'].append(round_sig(peak))
         result['flux uncertainty'].append(round_sig(flux_uncertainty, sig=1))
-        
+        result['pbcor'].append(round_sig(pbcor, sig=2))   
+     
     return result
 
 
@@ -149,14 +161,14 @@ bands = ['band 3', 'band 6', 'band3_2016', 'band3_2016_p5', 'band7_2016',
          'band7_2016_p5', 'band3_2016_p5_p9']
 
 for band in bands:
-    result = measure_flux(continuum[band], statistics[band])
+    result = measure_flux(continuum[band], statistics[band], 
+                          pbimage=continuum[band]['pbimage'])
     statistics[band].update(result)
     statistics[band]['flux'] = [i * 1000 for i in statistics[band]['flux']]
     statistics[band]['flux uncertainty'] = [i * 1000 for i in 
                                            statistics[band]['flux uncertainty']]
     statistics[band]['peak intensity'] = [i * 1000 for i in 
-                                         statistics[band]['peak intensity']]
-                                            
+                                         statistics[band]['peak intensity']]                                            
 
 # add the measurement for band7 apertures. 
 # update the region file. 
@@ -173,12 +185,14 @@ for band in bands:
 bands = ['band3_2016', 'band7_2016', 'band3_2016_p5', 'band7_2016_p5', 
         'band3_2016_p5_p9']
 for band in bands: 
-    result = measure_flux(continuum[band], statistics[band])
+    result = measure_flux(continuum[band], statistics[band], 
+                            pbimage=continuum[band]['pbimage'])
     statistics[band]['flux'].insert(6, result['flux'][0] * 1000)
     statistics[band]['peak intensity'].insert(6, 
                     result['peak intensity'][0] * 1000)
     statistics[band]['flux uncertainty'].insert(6, 
                     result['flux uncertainty'][0] * 1000)
+    statistics[band]['pbcor'].insert(6, result['pbcor'][0])
 
 # add the measurement for sources that broken apart
 # update the regions file
@@ -188,9 +202,11 @@ for band in bands:
 
 # measure the flux
 for band in bands:
-    result = measure_flux(continuum[band], statistics[band])
+    result = measure_flux(continuum[band], statistics[band], 
+                          pbimage=continuum[band]['pbimage'])
     for key in ['flux', 'peak intensity', 'flux uncertainty']:
         result[key] = (np.array(result[key])*1000).tolist()
     statistics[band]['flux'] = statistics[band]['flux'] + result['flux']
     statistics[band]['peak intensity'] += result['peak intensity']
     statistics[band]['flux uncertainty'] += result['flux uncertainty']
+    statistics[band]['pbcor'] += result['pbcor']
