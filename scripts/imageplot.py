@@ -21,6 +21,7 @@ import pandas as pd
 from regions import read_ds9
 import copy
 import sys
+from matplotlib.colors import LogNorm
 
 ############################################################
 # directories and files
@@ -35,16 +36,16 @@ GMC_dir = Dir+'2018/'
 SC_dir = Dir + '2016/'
 
 cont_Band3_GMC = Dir + '2018/cont_100GHz/image/'\
-                       'ngc4038_band3_cont_12m_7m_pbcor.fits'
-cont_Band3_SC = Dir + '2016/Band3/ngc40389overlap_band3_uvrange_robust_2_smooth_pbcor.fits'
+                       'ngc4038_band3_cont_12m_7m.fits'
+cont_Band3_SC = Dir + '2016/Band3/ngc40389overlap_band3_uvrange_robust_2_smooth.fits'
 
 cont_Band3_SC_p5 = Dir + '2016/Band3/ngc40389overlap_band3_uvrange_robust_p5_smooth_pbcor.fits'
 
 cont_Band3_SC_p5_009 = Dir + '2016/Band3/ngc40389overlap_band3_uvrange_robust_p5_smooth_090_pbcor.fits' 
 
 cont_Band6_GMC = Dir + '2018/cont_200GHz/image/'\
-                       'ngc4038_band6_cont_12m_7m_pbcor.fits'
-cont_Band7_SC = Dir + '2016/Band3/ngc40389overlap_band7_range_robust_2_smooth_pbcor.fits'
+                       'ngc4038_band6_cont_12m_7m.fits'
+cont_Band7_SC = Dir + '2016/Band7/ngc40389overlap_band7_range_robust_2_smooth.fits'
 
 cont_Band7_SC_p5 = Dir + '2016/Band3/ngc40389overlap_band7_range_robust_p5_smooth_pbcor.fits'
 
@@ -82,6 +83,15 @@ def import_coords(regionfile, ra_add = 0*u.arcsec, dec_add = 0*u.arcsec):
 galaxy='antennae'
 line='100 GHz'
 
+# center of two nucleus
+# From Zhang & Fall, 2001
+ra = 15*(12*u.deg+1*u.arcmin+53*u.arcsec); dec = -(18*u.deg+52*u.arcmin+1.9*u.arcsec)
+coords_north_sky = SkyCoord(dec=dec, ra=ra, frame='icrs')
+ra = 15*(12*u.deg+1*u.arcmin+53.5*u.arcsec); dec = -(18*u.deg+53*u.arcmin+9.8*u.arcsec)
+coords_south_sky = SkyCoord(dec=dec, ra=ra, frame='icrs')
+
+
+# image cut center
 GMC_ra = 15 * (12*u.degree + 1*u.arcmin + 53.192*u.arcsec)
 GMC_dec = -(18*u.degree + 52*u.arcmin + 31.8*u.arcsec) 
 SC_ra = 15*(12*u.degree + 1*u.arcmin + 54.9*u.arcsec)
@@ -96,7 +106,7 @@ for key in continuum.keys():
 
 # continuum image for Band 3 GMC data
 continuum['band3_GMC']['imagename'] = cont_Band3_GMC
-continuum['band3_GMC']['vmax'] = 1.18e-4
+continuum['band3_GMC']['vmax'] = 1.18e-4 / 2
 continuum['band3_GMC']['vmin'] = 2*1.2e-5
 continuum['band3_GMC']['color_scheme'] = 'viridis'
 continuum['band3_GMC']['txts'] = ['1','2','3','4','5','6','7','8','9','10','11','12','13']
@@ -111,7 +121,7 @@ continuum['band3_GMC']['txt_coords'] = coords
 
 # continuum image for Band 3 SC data
 continuum['band3_SC']['imagename'] = cont_Band3_SC
-continuum['band3_SC']['vmax'] = 1.4e-4
+continuum['band3_SC']['vmax'] = 1.4e-4 / 2
 continuum['band3_SC']['vmin'] = 2*1.4e-5
 continuum['band3_SC']['color_scheme'] = 'viridis'
 continuum['band3_SC']['txts'] = ['1a','1b','2','3','4','5','7','9']
@@ -132,7 +142,7 @@ continuum['band3_SC_p5_009']['imagename'] = cont_Band3_SC_p5_009
 
 # continuum image for Band 6 GMC data
 continuum['band6_GMC']['imagename'] = cont_Band6_GMC
-continuum['band6_GMC']['vmax'] = 5.24e-4
+continuum['band6_GMC']['vmax'] = 5.24e-4 / 2
 continuum['band6_GMC']['vmin'] = 2*5.3e-5
 continuum['band6_GMC']['color_scheme'] = 'hot'
 continuum['band6_GMC']['txts'] = ['1','2','3','5','6','7','8','9','10','11','12','13']
@@ -146,7 +156,7 @@ continuum['band6_GMC']['txt_coords'] = coords
 
 # continuum image for Band 7 SC data
 continuum['band7_SC']['imagename'] = cont_Band7_SC
-continuum['band7_SC']['vmax'] = 4.2e-4
+continuum['band7_SC']['vmax'] = 4.2e-4 / 2
 continuum['band7_SC']['vmin'] = 2*4.1e-5
 continuum['band7_SC']['color_scheme'] = 'hot'
 continuum['band7_SC']['txts'] = ['1a','1b', '2','5','6','7','9']
@@ -160,10 +170,6 @@ continuum['band7_SC']['txt_coords'] = coords
 # continuum image for Band 7 SC data with robust of 0.5
 continuum['band7_SC_p5'] = copy.deepcopy(continuum['band7_SC'])
 continuum['band7_SC_p5']['imagename'] = cont_Band7_SC_p5
-
-# import individual clusters to zoom in 
-sys.path.append('configs')
-from imageplot_cluster_zoomin import clusters 
 
 # regions to zoom in
 region_labels = ['a', 'b', 'c']
@@ -196,7 +202,7 @@ zooms['c']['position'] = center
 zooms['c']['size'] = u.Quantity((0.46, 0.32), u.arcmin)
 zooms['c']['aperture'] =  SkyRectangularAperture(center, 0.46*u.arcmin, 0.32*u.arcmin)
 
-gamma = 1.0
+gamma = 0.3
 
 ############################################################
 # basic settings
@@ -220,12 +226,16 @@ band7_SC = ['band7_SC']
 
 add_label = True
 overlay_CO_Chris = False
-overlay_CO_Nate = True
+overlay_CO_Nate = False
+overlay_CO_Finn = True
 overlay_FOV = True
 overlay_Rcluster = False
 draw_region = False
+mark_center = True
 
 datatypes = ['band3_SC', 'band7_SC', 'band3_GMC', 'band6_GMC']
+# datatypes = ['band3_SC', 'band7_SC']
+# datatypes = ['band3_GMC', 'band6_GMC']
 extension = '.pdf'
 
 for data in datatypes:
@@ -292,21 +302,44 @@ for data in datatypes:
                                                  wcs_cut, 
                                                  shape_out=np.shape(cont_image_cut))
         levels = 90.6*np.array([0.01, 0.016, 0.025, 0.04, 0.06, 0.095, 0.15, 0.23, 0.37, 0.57])
-        ax.contour(co_contour, levels=levels, colors='white', linewidths=0.2,
+        ax.contour(co_contour, levels=levels, colors='white', linewidths=0.5,
                    origin='lower')
         pictureName = pictureName.replace(extension, '_CO2-1'+extension)        
         
     if overlay_CO_Nate == True: 
         co_mom0_file = Dir + '2018/12CO21/'\
-                'ngc_4038_4039_12m_ext+12m_com+7m_co21_mom0_2sig_pbcor_K.fits'        
+                'ngc_4038_4039_12m_ext+12m_com+7m_co21_flat_round_k_mom0.fits'        
         wcs_co, data_co = fits_import(co_mom0_file)
         co_contour, footprint = reproject_interp((data_co, wcs_co), 
                                                 wcs_cut,
                                                 shape_out=np.shape(cont_image_cut))
-        levels = 9.33 * np.array([5, 10, 20, 30, 40]) 
-        ax.contour(co_contour, colors='grey', linewidths=0.05, origin='lower', 
+        levels = 9.33 * np.array([5, 20, 40]) 
+        ax.contour(co_contour, colors='grey', linewidths=0.5, origin='lower', 
                    levels=levels)
         pictureName = pictureName.replace(extension, '_CO2-1Nate'+extension)
+
+    if overlay_CO_Finn == True:
+        co_mom0_file = Dir + 'mollyFinn/Antennae_12CO21_mom0.fits'
+        wcs_co, data_co = fits_import(co_mom0_file)
+        co_contour, footprint = reproject_interp((data_co, wcs_co),
+                                                wcs_cut,
+                                                shape_out=np.shape(cont_image_cut))
+        levels = 1.1e-2 * np.array([15])
+        ax.contour(co_contour, colors='grey', linewidths=0.5, origin='lower',
+                   levels=levels)
+        pictureName = pictureName.replace(extension, '_CO2-1Finn'+extension)
+
+    if mark_center == True:
+        coords_north_pix = coords_north_sky.to_pixel(wcs_cut) 
+        coords_south_pix = coords_south_sky.to_pixel(wcs_cut)
+        if data in ['band3_GMC', 'band3_SC']:
+            color='red'
+        else:
+            color='blue'
+        plt.scatter([coords_north_pix[0], coords_south_pix[0]], 
+                    [coords_north_pix[1], coords_south_pix[1]], 
+                    marker='+', s=160, color=color, linewidths=0.5, zorder=2)
+        pictureName = pictureName.replace(extension, '_center'+extension)
 
     if overlay_FOV == True:  
         if data == 'band3_GMC': 
@@ -338,7 +371,8 @@ for data in datatypes:
         aper_pix = aper.to_pixel(wcs_cut)
         aper_pix.plot(color='white')
         pictureName = pictureName.replace(extension, '_Rcluster'+extension)
-    
+   
+#     plt.show() 
         
     if draw_region == True:
         for key in zooms.keys():
@@ -350,6 +384,10 @@ for data in datatypes:
             pictureName = pictureName.replace('_'+key+extension, extension)
     else:
         plt.savefig(picDir+pictureName, bbox_inches='tight')
+
+    print(pictureName)
+# test
+
 
 # # export fitsfile for each cluster
 # datatypes = ['band3_SC', 'band3_SC_p5', 'band3_SC_p5_009','band7_SC', 'band7_SC_p5']

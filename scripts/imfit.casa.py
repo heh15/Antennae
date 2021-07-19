@@ -24,7 +24,7 @@ imagefile_band3_2016 = imageDir_band3_2016 + \
 ratio = 2.0
 
 bands = ['band 3', 'band 6', 'band3_2016', 'band3_2016_p5', 'band7_2016', 'band7_2016_p5',
-        'band3_2016_p5_p9', 'band3_p9_multiple']
+        'band3_2016_p5_p9', 'band3_p9_multiple', 'band3_p9_1b']
 continuum = dict.fromkeys(bands)
 
 # band 3 image parameters for 2018 data
@@ -33,13 +33,16 @@ continuum['band 3']['imagename'] = imagefile_band3
 continuum['band 3']['region'] = sourcefile_band3
 continuum['band 3']['outfile'] = regionDir + 'source_band3_imfit.crtf'
 continuum['band 3']['pbimage'] = imageDir_band3 + 'ngc4038_band3_cont_12m_7m.pb'
-
+continuum['band 3']['rms'] = None
+ 
 # band 6 image parameters for 2018 data. 
 continuum['band 6'] = {}
 continuum['band 6']['imagename'] = imagefile_band6
 continuum['band 6']['region'] = sourcefile_band6
 continuum['band 6']['outfile'] = regionDir + 'source_band3_imfit.crtf'
 continuum['band 6']['pbimage'] = imageDir_band6 + 'ngc4038_band6_cont_12m_7m.pb'
+continuum['band 6']['rms'] = None
+
 
 # parameters for 2016 data in band 3. 
 continuum['band3_2016'] = {}
@@ -54,57 +57,107 @@ import copy
 
 from imfit_params_band3_2016_p5 import params
 continuum['band3_2016_p5'] = copy.deepcopy(params)
+continuum['band3_2016_p5']['pbcor'] = np.array([0.86, 0.87, 0.89, 0.58, 0.55, 0.99, 0.99, 0.96, 0.76]) 
+continuum['band3_2016_p5']['rms'] = 1.5e-5
 
 # parameters for 2015 data in band 7. 
 from imfit_params_band7_2016 import params
 continuum['band7_2016'] = copy.deepcopy(params)
+continuum['band7_2016']['rms'] = None
 
 # parameters for 2016 data in band 7 with robust=0.5
 from imfit_params_band7_2016_p5 import params
 continuum['band7_2016_p5'] = copy.deepcopy(params)
-
+continuum['band7_2016_p5']['rms'] = 4.1e-5 
+continuum['band7_2016_p5']['pbcor'] = np.array([0.93])
 
 # parameters for 2016 data in band 3, robust 0.5, smoothed to 0.9 arcsec
 from imfit_params_band3_2016_p5_p9 import params
 continuum['band3_2016_p5_p9'] = copy.deepcopy(params)
+continuum['band3_2016_p5_p9']['rms'] = None
 
 # Fit the source thant broken into multiple sources in Band3 2016 image 
 # with resolution of 0.9 arcsec. 
 
 from imfit_params_multiple import params
 continuum['band3_p9_multiple'] = copy.deepcopy(params)
+continuum['band3_p9_multiple']['rms'] = None
+
+# parameters to fit the source 1b with double gaussian
+from imfit_params_1b import params
+continuum['band3_p9_1b'] = copy.deepcopy(params)
+continuum['band3_p9_1b']['rms'] = None
 
 ###########################################################
 # function
 
-def beam_get(imagename, region_init, ratio=2.0):
+def beam_get(imagename, region_init, ratio=2.0, **kwarg):
     ''' 
     parameters
     imagename: The path to the CASA image file
     regions: The path to the CASA region file or the CASA 
     region string. 
     ratio: The ratio to be multiplied by the fitted ellipse to 
-    get the final elliptical aperture shape. 
-    '''
-    beam=imfit(imagename=imagename,region=region_init)
-    x_value=beam['results']['component0']['shape']\
-             ['direction']['m0']['value']
-    y_value=beam['results']['component0']['shape']\
-             ['direction']['m1']['value']
-    bmaj_value=beam['results']['component0']\
-                ['shape']['majoraxis']['value']
-    bmin_value=beam['results']['component0']['shape']\
-                ['minoraxis']['value']
-    pa_value=beam['results']['component0']['shape']\
-              ['positionangle']['value']
-    x=str(x_value)+'rad'
-    y=str(y_value)+'rad'
-    bmaj=str(bmaj_value/2.0*ratio)+'arcsec'
-    bmin=str(bmin_value/2.0*ratio)+'arcsec'
-    pa=str(pa_value)+'deg'
-    region='ellipse[['+x+','+y+'],['+bmaj+','+bmin+'],'+pa+']'
+    get the final elliptical aperture shape.
+    **kwarg: other parameters that goes into the imfit 
+    '''  
+    beam=imfit(imagename=imagename,region=region_init, **kwarg)
+    regions = []
+    for i in range(beam['results']['nelements']):
+        component = 'component' + str(i)
+        x_value=beam['results'][component]['shape']\
+                 ['direction']['m0']['value']
+        y_value=beam['results'][component]['shape']\
+                 ['direction']['m1']['value']
+        bmaj_value=beam['results'][component]\
+                    ['shape']['majoraxis']['value']
+        bmin_value=beam['results'][component]['shape']\
+                    ['minoraxis']['value']
+        pa_value=beam['results'][component]['shape']\
+                  ['positionangle']['value']
+        x=str(x_value)+'rad'
+        y=str(y_value)+'rad'
+        bmaj=str(bmaj_value/2.0*ratio)+'arcsec'
+        bmin=str(bmin_value/2.0*ratio)+'arcsec'
+        pa=str(pa_value)+'deg'
+        region='ellipse[['+x+','+y+'],['+bmaj+','+bmin+'],'+pa+']'
+        regions.append(region)
 
-    return region
+    return regions
+
+
+def beam_to_regions(beam, ratio=2.0):
+    '''
+    Write the CASA beam object into CASA
+    ------
+    Parameters:
+    beam: CASA beam object
+    The beam acquired from task such as imfit
+    ratio: float
+    The ratio value to be multiplied to the beam object 
+    '''   
+    regions = []
+    for i in range(beam['results']['nelements']):
+        component = 'component' + str(i)
+        x_value=beam['results'][component]['shape']\
+                 ['direction']['m0']['value']
+        y_value=beam['results'][component]['shape']\
+                 ['direction']['m1']['value']
+        bmaj_value=beam['results'][component]\
+                    ['shape']['majoraxis']['value']
+        bmin_value=beam['results'][component]['shape']\
+                    ['minoraxis']['value']
+        pa_value=beam['results'][component]['shape']\
+                  ['positionangle']['value']
+        x=str(x_value)+'rad'
+        y=str(y_value)+'rad'
+        bmaj=str(bmaj_value/2.0*ratio)+'arcsec'
+        bmin=str(bmin_value/2.0*ratio)+'arcsec'
+        pa=str(pa_value)+'deg'
+        region='ellipse[['+x+','+y+'],['+bmaj+','+bmin+'],'+pa+']'
+        regions.append(region)
+
+    return regions
 
 ###########################################################
 # main program 
@@ -112,11 +165,19 @@ def beam_get(imagename, region_init, ratio=2.0):
 # Set the default value of the ratio. 
 for band in bands:
     continuum[band]['ratio'] = ratio
-    if band == 'band3_p9_multiple':
+    if band in ['band3_p9_multiple', 'band3_p9_1b']:
         continuum[band]['ratio'] = 1.0
 
+# set the double gaussian fitting
+for band in bands:
+    continuum[band]['kwarg'] = {}
+    if band == 'band3_p9_1b':
+        continuum[band]['kwarg']['estimates'] = scriptDir + 'configs/cluster1b_estimates.txt' 
+         
+
 bands = ['band 3', 'band3_2016', 'band3_2016_p5', 'band7_2016', 'band7_2016_p5',
-        'band3_2016_p5_p9', 'band3_p9_multiple']
+        'band3_2016_p5_p9', 'band3_p9_multiple', 'band3_p9_1b']
+bands = ['band7_2016_p5']
 
 for band in bands:
     regions = []
@@ -130,11 +191,18 @@ for band in bands:
     # fit different regions with 2D Gaussian function and decide 
     # the aperture size to measure the flux. 
     fittedRegions = []
-    for region in regions:
-        fittedRegion = beam_get(continuum[band]['imagename'], region, 
-                                ratio=continuum[band]['ratio'])
-        fittedRegions.append(fittedRegion)
-
+    fittedBeams = []
+    for i, region in enumerate(regions):
+        rms = continuum[band]['rms'] / continuum[band]['pbcor'][i]
+        fittedBeam = imfit(imagename = continuum[band]['imagename'], 
+                            region = region,
+#                            rms = rms, 
+                            **continuum[band]['kwarg'])
+        fittedRegion = beam_to_regions(fittedBeam, ratio=continuum[band]['ratio']) 
+        fittedRegions += fittedRegion
+        print(fittedBeam['deconvolved']['component0']['shape']['majoraxis'])
+        print(fittedBeam['deconvolved']['component0']['shape']['majoraxiserror'])
+        
     # Export the regions into a file. 
     with open (continuum[band]['outfile'], 'w') as outfile:
         outfile.write('#CRTFv0 CASA Region Text Format version 0\n')

@@ -6,7 +6,8 @@ imageDir = Dir + '2016/Band3/'
 
 params = {}
 params['imagename'] = imageDir + 'ngc40389overlap_band3_uvrange_robust_p5.pbcor'
-params['region'] = regionDir + 'source_band3_2016_p5_imfit_v2.crtf'
+params['region'] = regionDir + 'source_band3_2016_init_contour.crtf'
+params['outfile'] = regionDir + 'source_band3_2016_p5_imfit_v2.crtf'
 params['pbimage'] = imageDir + 'ngc40389overlap_band3_uvrange_robust_p5.pb'
 
 statistic = {}

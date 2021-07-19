@@ -196,7 +196,7 @@ for band in bands:
 
 # add the measurement for sources that broken apart
 # update the regions file
-bands = ['band3_2016_p5_p9']
+bands = ['band3_2016_p5_p9', 'band7_2016_p5']
 for band in bands: 
     continuum[band]['region'] = regionDir + 'source_band3_multiple_imfit.crtf'
 

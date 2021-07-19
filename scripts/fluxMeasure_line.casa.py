@@ -8,12 +8,17 @@ scriptDir = Dir + 'scripts/'
 regionDir = Dir + 'regions/'
 imagefile_co = Dir + 'mollyFinn/Antennae_12CO21_pbcor.mom0'
 imagefile_co_cube = Dir + 'mollyFinn/Ant_B6high_Combined_12CO2_1.cube.pbcor'
+
 sourcefile_band3_2016 = regionDir + 'source_band3_2016_imfit.crtf'
+sourcefile_band3_2016_p5 = regionDir + 'source_band3_2016_p5_imfit_v2.crtf'
+
+pbimage = Dir + 'mollyFinn/Ant_B6high_Combined_12CO2_1.mom8.pb'
+
 
 ###########################################################
 # basic settings
 
-bands = ['co_cube', 'co_mom0']
+bands = ['co_cube', 'co_mom0', 'co_cube_p5', 'co_mom0_p5']
 linedata = {}
 statistics = {}
 # measure the co flux
@@ -31,6 +36,13 @@ statistics['co_cube']['pix/beam'] = 63
 statistics['co_cube']['chans'] = ['33~48', '38~47', '29~39', '0', '0', '14~30', '41~46', '0']
 statistics['co_cube']['chan_num'] = [15, 9, 10, 0, 0, 16, 5, 0]
 
+
+# parameters for CO cube but witth smaller apertures
+linedata['co_cube_p5'] = copy.deepcopy(linedata['co_cube'])
+linedata['co_cube_p5']['region'] = sourcefile_band3_2016_p5
+
+statistics['co_cube_p5'] = copy.deepcopy(statistics['co_cube'])
+
 # parameters for CO moment 0 
 linedata['co_mom0'] = copy.deepcopy(linedata['co_cube'])
 linedata['co_mom0']['imagename'] = imagefile_co
@@ -40,6 +52,20 @@ statistics['co_mom0'] = copy.deepcopy(statistics['co_cube'])
 statistics['co_mom0']['chans'] = '0'
 statistics['co_mom0']['chan_num'] = 0
 
+# parameters for CO moment map with smaller apertures
+linedata['co_mom0_p5'] =  copy.deepcopy(linedata['co_mom0'])
+linedata['co_mom0_p5']['region'] = sourcefile_band3_2016_p5
+
+statistics['co_mom0_p5'] = copy.deepcopy(statistics['co_mom0'])
+
+# # parameters for CO 3-2 cube
+# linedata['co32_cube']['imagename'] = 
+# linedata['co32_cube']['region'] = sourcefile_band3_2016
+# linedata['co32_cube']['measure_cube'] = True
+# 
+# # prameters for CO 3-2 moment 0 
+# linedata['co32_mom0'] = copy.deepcopy(linedata['co32_cube'])
+# linedata['co32_mom0']['imagename'] = 
 
 # measurement from additional apertures. 
 chans_add = ['37~48', '37~48','30~39', '0', '0', '18~31', '0', '0']
@@ -124,7 +150,8 @@ for band in bands:
     measure_cube = linedata[band]['measure_cube']
     result = measure_flux(linedata[band], statistics[band], 
                           measure_cube=measure_cube,
-                          chans=chans, chan_num=chan_num)
+                          chans=chans, chan_num=chan_num,
+                          pbimage=pbimage)
     statistics[band].update(result)
 
 # Add the measurement for region 6, which only has the band 7 detection
@@ -132,8 +159,17 @@ bands = ['co_cube', 'co_mom0']
 regionfile = regionDir + 'source_band7_2016_imfit.crtf'
 for band in bands:
     linedata[band]['region'] = regionfile
+
+bands = ['co_cube_p5', 'co_mom0_p5']
+regionfile = regionDir + 'source_band7_2016_imfit_p5.crtf'
+for band in bands:
+    linedata[band]['region'] = regionfile
+
 statistics['co_cube']['chans'] = ['8~28']
 statistics['co_cube']['chan_num'] = [20]
+statistics['co_cube_p5']['chans'] = ['8~28']
+statistics['co_cube_p5']['chans_num'] = [20]
+
 
 for band in bands:
     chans = statistics[band]['chans']
@@ -141,19 +177,25 @@ for band in bands:
     measure_cube = linedata[band]['measure_cube']
     result = measure_flux(linedata[band], statistics[band],
                           measure_cube=measure_cube,
-                          chans=chans, chan_num=chan_num)
+                          chans=chans, chan_num=chan_num, 
+                          pbimage=pbimage)
     statistics[band]['flux'].insert(6, result['flux'][0])
     statistics[band]['peak intensity'].insert(6, result['peak intensity'][0])
     statistics[band]['flux uncertainty'].insert(6, 
                                          result['flux uncertainty'][0])
+    statistics[band]['pbcor'].insert(6, result['pbcor'][0])
+
+print(statistics['co_cube_p5']['pbcor'])
 
 # Add the measurement for sources that broken into multiple regions. 
-bands = ['co_cube', 'co_mom0']
+# bands = ['co_cube', 'co_mom0']
 regionfile = regionDir + 'source_band3_multiple_imfit.crtf'
 for band in bands:
     linedata[band]['region'] = regionfile
 statistics['co_cube']['chans'] = chans_add
 statistics['co_cube']['chan_num'] = chan_num_add
+statistics['co_cube_p5']['chans'] = chans_add
+statistics['co_cube_p5']['chans_num'] = chan_num_add
 
 for band in bands:
     chans = statistics[band]['chans']
@@ -161,7 +203,31 @@ for band in bands:
     measure_cube = linedata[band]['measure_cube']
     result = measure_flux(linedata[band], statistics[band],
                           measure_cube=measure_cube,
-                          chans=chans, chan_num=chan_num)
+                          chans=chans, chan_num=chan_num, 
+                          pbimage=pbimage)
     statistics[band]['flux'] += result['flux']
     statistics[band]['peak intensity'] += result['peak intensity']
     statistics[band]['flux uncertainty'] += result['flux uncertainty'] 
+
+# Add the measurement for source 1b with updated double gaussian fitting
+regionfile = regionDir + 'source_band3_1b_doublefit.crtf'
+for band in bands:
+    linedata[band]['region'] = regionfile
+statistics['co_cube']['chans'] = chans_add
+statistics['co_cube']['chan_num'] = chan_num_add
+statistics['co_cube_p5']['chans'] = chans_add
+statistics['co_cube_p5']['chans_num'] = chan_num_add
+
+for band in bands:
+    chans = statistics[band]['chans']
+    chan_num = statistics[band]['chan_num']
+    measure_cube = linedata[band]['measure_cube']
+    result = measure_flux(linedata[band], statistics[band],
+                          measure_cube=measure_cube,
+                          chans=chans, chan_num=chan_num,
+                          pbimage=pbimage)
+    statistics[band]['flux'] += result['flux']
+    statistics[band]['peak intensity'] += result['peak intensity']
+    statistics[band]['flux uncertainty'] += result['flux uncertainty']
+
+
