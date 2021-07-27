@@ -33,7 +33,10 @@ GMC_dir = Dir+'2018/'
 SC_dir = Dir + '2016/'
 
 comom8_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_mom8_5sig_pbcor_K_rebin.fits'
+comom8_file2 = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_flat_round_k_rebin_5sig_regrid_mom8.fits'
 comom0_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_mom0_2sig_pbcor_K_rebin.fits'
+
+
 _13cofile = GMC_dir + '13CO21/member.uid___A001_X133d_X96f.NGC4038_sci.spw29.cube.I.pbcor.fits'
 GMCreg_file = regionDir + 'source_band3_imfit.reg'
 
@@ -43,6 +46,8 @@ GMCreg_file = regionDir + 'source_band3_imfit.reg'
 galaxy = 'antennae'
 alphaCO = 4.3
 ratio = 0.7
+
+rms_K = 0.25
 
 ############################################################
 # function 
@@ -77,6 +82,12 @@ def Regmask_convert(aperture,data_cut):
 
 wcs, Tpeak = fits_import(comom8_file)
 wcs, T_mom0 = fits_import(comom0_file)
+wcs, Tpeak_npbcor = fits_import(comom8_file2)
+
+# exclude the pixels with peak greater than 10 sigma
+cut_off = 10 * rms_K
+Tpeak[np.where(Tpeak_npbcor < cut_off)] = np.nan
+nan_mask = np.ma.masked_invalid(Tpeak).mask
 
 ## Calculate the temperature. 
 
@@ -102,6 +113,7 @@ for reg in regs:
     reg_pix = reg.to_pixel(wcs)
     regs_pix.append(reg_pix)
     reg_mask = Regmask_convert(reg_pix, Tpeak)
+    reg_mask = np.ma.masked_array(reg_mask, nan_mask)
     clusters_Tpeak.append(np.ma.max(reg_mask))
     reg_mask = Regmask_convert(reg_pix, T_mom0)
     clusters_Tmom0.append(np.ma.max(reg_mask))
@@ -111,6 +123,10 @@ clusters_Tmom0 = np.array(clusters_Tmom0)
 
 clusters_Tkin = 11.07 / np.log(1+11.07/(clusters_Tpeak+TR_bg))
 clusters_sigmol = clusters_Tmom0 / ratio * alphaCO
+pbcor = np.array([0.9, 0.95, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.95, 0.95, 0.95, 0.95, 0.7])
+clusters_Tkin_err = rms_K / clusters_Tpeak * clusters_Tkin
+print(clusters_Tkin)
+print(clusters_Tkin_err)
 
 # fig = plt.figure()
 # plt.imshow(Tpeak, origin='lower')
@@ -130,11 +146,12 @@ plt.scatter(clusters_sigmol, clusters_Tkin, marker='o', label='YMCs')
 for i, txt in enumerate(txts):
     plt.annotate(txt, (clusters_sigmol[i], clusters_Tkin[i]), 
                 (xtexts[i], ytexts[i]), fontsize=20)
-plt.xlabel('$\mathrm{\Sigma_{mol}}$ $M_{\odot}$ pc$^{-2}$', fontsize=40)
-plt.ylabel('temperature (K)', fontsize=40)
-plt.legend(fontsize=30)
+plt.xlabel('$\mathrm{\Sigma_{mol}}$ ($M_{\odot}$ pc$^{-2}$)', fontsize=20)
+plt.ylabel('T$_{\mathrm{kin}}$ (K)', fontsize=20)
+plt.legend(fontsize=15)
+plt.tick_params(labelsize = 20)
 fig.tight_layout()
-# plt.show()
+plt.show()
 plt.savefig(picDir+'GMC_LTE_temperature.pdf')
 
 
