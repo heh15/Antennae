@@ -32,9 +32,9 @@ logDir = Dir+'logs/'
 GMC_dir = Dir+'2018/'
 SC_dir = Dir + '2016/'
 
-comom8_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_mom8_5sig_pbcor_K_rebin.fits'
-comom8_file2 = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_flat_round_k_rebin_5sig_regrid_mom8.fits'
-comom0_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_mom0_2sig_pbcor_K_rebin.fits'
+comom8_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m+tp_co21_pbcorr_round_k_regrid_mom8.fits'
+comom8_file2 = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m_co21_flat_round_k_regrid_mom8.fits'
+comom0_file = GMC_dir + '12CO21/ngc_4038_4039_12m_ext+12m_com+7m+tp_co21_pbcorr_round_k_regrid_mom0.fits'
 
 
 _13cofile = GMC_dir + '13CO21/member.uid___A001_X133d_X96f.NGC4038_sci.spw29.cube.I.pbcor.fits'
@@ -86,6 +86,7 @@ wcs, Tpeak_npbcor = fits_import(comom8_file2)
 
 # exclude the pixels with peak greater than 10 sigma
 cut_off = 10 * rms_K
+Tpeak[np.isnan(Tpeak_npbcor)] = np.nan
 Tpeak[np.where(Tpeak_npbcor < cut_off)] = np.nan
 nan_mask = np.ma.masked_invalid(Tpeak).mask
 
@@ -128,11 +129,11 @@ clusters_Tkin_err = rms_K / clusters_Tpeak * clusters_Tkin
 print(clusters_Tkin)
 print(clusters_Tkin_err)
 
-# fig = plt.figure()
-# plt.imshow(Tpeak, origin='lower')
+fig = plt.figure()
+plt.imshow(Tpeak, origin='lower')
 # for reg_pix in regs_pix:
 #     reg_pix.plot(color='red')
-# plt.show()
+plt.show()
 
 txts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
 xtexts = clusters_sigmol*10**0.03
@@ -151,7 +152,7 @@ plt.ylabel('T$_{\mathrm{kin}}$ (K)', fontsize=20)
 plt.legend(fontsize=15)
 plt.tick_params(labelsize = 20)
 fig.tight_layout()
-plt.show()
+# plt.show()
 plt.savefig(picDir+'GMC_LTE_temperature.pdf')
 
 
