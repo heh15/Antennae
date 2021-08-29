@@ -48,8 +48,10 @@ vmax = {}
 vmax['SC'] = 1.4e-4
 vmax['GMC'] = 1.2e-4
 
- 
-##################################################
+# spectrum channels to fit the Gaussian
+chans = [[33, 48], [36, 48], [29, 39], [14, 30], [9, 24], [40, 46]]
+
+#################################################
 # functions
 
 def fits_import(fitsimage, item=0):
@@ -70,33 +72,6 @@ def cut_2d(data,position,size,wcs):
 
 ##################################################
 # main program
-
-# # zoom in subregions of the Antennae galaxy
-# for region in regions:
-#     for resolution in resolutions:
-#         filename = imageDir+region+'_band3_'+resolution+'_zoom.fits'
-#         wcs, band3_data = fits_import(filename)
-# 
-#        # plot the image
-#         fig = plt.figure()
-#         ax = plt.subplot(111, projection=wcs)
-#         ax.imshow(band3_data, origin='lower', vmin = vmin[resolution], vmax=vmax[resolution])
-#         levels = rms[resolution]*np.array([7.5, 10, 12.5, 15])
-# 
-#         if resolution == 'SC':
-#             filename = imageDir+region+'_band7_'+resolution+'_zoom.fits'
-#         if resolution == 'GMC':
-#             filename = imageDir+region+'_band6_'+resolution+'_zoom.fits'
-#         
-# #        if (resolution == 'SC') and (region == 'b'):
-# #            plt.savefig(picDir+region+'_band3_contour_'+resolution+'.png')
-# #            continue
-#         wcs_contour, contour = fits_import(filename)
-#         contour_proj, footprint = reproject_interp((contour, wcs_contour), wcs, 
-#                                          shape_out=np.shape(band3_data.data)) 
-#  
-#         ax.contour(contour_proj.data, colors = 'red', levels=levels, linewidths=0.6)
-#         plt.savefig(picDir+region+'_band3_contour_'+resolution+'.png')
 
 #############################
 # import data
@@ -167,7 +142,7 @@ gc = gridspec.GridSpec(ncols=2, nrows=1, figure=fig, width_ratios=[2.5*len(datat
 
 # sub gridspec
 gc1 = gridspec.GridSpecFromSubplotSpec(ncols=len(datatypes), nrows=6, subplot_spec=gc[0],
-                                       hspace=0.05, wspace=0.01) 
+                                       hspace=0.07, wspace=0.01) 
 # gc1.update(hspace=0.1, wspace=0.1)
 
 axes = {}
@@ -248,6 +223,11 @@ for m, cluster in enumerate(clusters):
     axes[3][m] = fig.add_subplot(gc2[m, 0])
     axes[3][m].plot(spectrum[0], spectrum[1], color='blue')
     axes[3][m].plot(spectrum[0], spectrum[2], color='orange')
+ 
+    #plot the range to fit the spectrum
+    axes[3][m].axvline(spectrum[0][chans[m][0]], linestyle='dotted',color='black')
+    axes[3][m].axvline(spectrum[0][chans[m][1]], linestyle='dotted', color='black')
+
     axes[3][m].tick_params(labelsize=7, direction='in')
     axes[3][m].set_ylabel('Intensity (Jy/beam)', fontsize=12)
 
