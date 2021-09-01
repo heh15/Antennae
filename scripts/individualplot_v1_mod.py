@@ -138,9 +138,9 @@ regionsSky = [regionsGMC_sky, regionsp5_sky, regionsSub_sky]
 #############################
 # draw figures
 
-fig = plt.figure(figsize=(2.5*len(datatypes)+3, 12.5), constrained_layout=False)
+fig = plt.figure(figsize=(2.5*len(datatypes)+3, 12.2), constrained_layout=False)
 gc = gridspec.GridSpec(nrows=2, ncols=1, figure=fig, height_ratios=[0.2, 12], 
-                        hspace=0.03)
+                        hspace=0.01)
 # grid for the colorbar
 gc_cbar = gridspec.GridSpecFromSubplotSpec(ncols=(len(datatypes)+1), nrows=1, subplot_spec=gc[0],
                                             width_ratios=[2.33,2.33,2.33,3.51], wspace=0)
@@ -225,9 +225,9 @@ for n, data in enumerate(datatypes):
     cb = plt.colorbar(im[n][0], cax=axes[n][6], orientation='horizontal',
                       ticks=[50,100])
     axes[n][6].get_xaxis().set_tick_params(labelsize=7, direction='in')
-    axes[n][6].get_xaxis().set_ticks_position('bottom')
+    axes[n][6].get_xaxis().set_ticks_position('top')
     axes[n][6].set_aspect(0.1)
-    axes[n][6].annotate('$\mu$Jy beam$^{-1}$', (0.71,-0.8),xycoords='axes fraction',
+    axes[n][6].annotate('$\mu$Jy beam$^{-1}$', (0.71,1.4),xycoords='axes fraction',
                         fontsize=7)
     
     # add the title for each column
