@@ -119,12 +119,20 @@ regionsp5_sky = {v: [k] for v, k in enumerate(regionsp5_sky)}
 #############################
 # draw figures
 
-fig = plt.figure(figsize=(12, 7.5), constrained_layout=False)
-gc = gridspec.GridSpec(ncols=1, nrows=2, figure=fig, height_ratios=[5,2.5],hspace=0.15)
+fig = plt.figure(figsize=(12, 7.7), constrained_layout=False)
+
+gc = gridspec.GridSpec(ncols=1, nrows=2, figure=fig, height_ratios=[0.2, 7.5], 
+                       hspace=0.02)
+gc_cbar = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=1, subplot_spec=gc[0],
+                                           width_ratios=[5,5], wspace=0.1)
+gc_main = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=1, subplot_spec=gc[1],
+                                           width_ratios=[5,5], hspace=0.15, wspace=0.1)
 
 # sub gridspec
-gc1 = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=2, subplot_spec=gc[0],
-                                       hspace=0.1, wspace=0.1) 
+gc1 = gridspec.GridSpecFromSubplotSpec(ncols=1, nrows=3, subplot_spec=gc_main[0],
+                                       hspace=0.1, wspace=0.1)
+gc1_cbar = gridspec.GridSpecFromSubplotSpec(ncols=1, nrows=1, subplot_spec=gc_cbar[0],
+                                       wspace=0.1) 
 # gc1.update(hspace=0.1, wspace=0.1)
 
 # import the image
@@ -132,12 +140,13 @@ for i, cluster in enumerate(clusters_resolved):
     gc1_sub = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=1, subplot_spec=gc1[i], 
                                                wspace=0)
     axes = {}
-
+    im = {}
     ##### plot the GMC resolution data #####
     filename = imageDir+cluster+'_band3'+'_GMC'+'.fits'
     wcs, band3_data = fits_import(filename)
     axes[0] = fig.add_subplot(gc1_sub[0,0], projection=wcs)
-    axes[0].imshow(band3_data, origin='lower', vmin=2.8e-5, vmax=1.4e-4)
+    im[0] = axes[0].imshow(band3_data*1e6, origin='lower', vmin=2.8e-5*1e6, 
+                           vmax=1.4e-4*1e6)
 
     # overlay contours
     filename = imageDir+cluster+'_band6'+'_GMC'+'.fits'
@@ -171,7 +180,7 @@ for i, cluster in enumerate(clusters_resolved):
     filename = imageDir+cluster+'_band3'+'_SC_p5'+'.fits'
     wcs, band3_data = fits_import(filename)
     axes[1] = fig.add_subplot(gc1_sub[0,1], projection=wcs)
-    axes[1].imshow(band3_data, origin='lower', vmin=2.8e-5, vmax=1.4e-4)
+    im[1] = axes[1].imshow(band3_data*1e6, origin='lower', vmin=2.8e-5*1e6, vmax=1.4e-4*1e6)
 
     # overlay contours
     filename = imageDir+cluster+'_band7'+'_SC_p5'+'.fits'
@@ -190,13 +199,9 @@ for i, cluster in enumerate(clusters_resolved):
     if i == 0:
         axes[0].coords[0].set_axislabel(' ')
         axes[1].coords[0].set_axislabel(' ')
-        # set title
-        axes[0].set_title('GMC resolution', fontsize=12)
-        axes[1].set_title('YMC resolution (0.11")', fontsize=12)
     if i == 1:
-        axes[0].coords[1].set_axislabel(' ')
-        axes[0].set_title('GMC resolution', fontsize=12)
-        axes[1].set_title('YMC resolution (0.11")', fontsize=12)
+        axes[0].coords[0].set_axislabel(' ')
+        axes[1].coords[0].set_axislabel(' ')
 
     # overlay YMC apertures
     region_pix = regionsp5_sky[i][0].to_pixel(wcs)
@@ -207,13 +212,31 @@ for i, cluster in enumerate(clusters_resolved):
              va='center', ha='center', color='white', fontsize=20)
     axes[1].annotate(cluster, **anno_opts)
 
-gc2 = gridspec.GridSpecFromSubplotSpec(ncols=5, nrows=1, subplot_spec=gc[1],
+# add the colorbar 
+axes_cbar = {}
+gc1_cbar_sub = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=1, subplot_spec=gc1_cbar[0],
+                                               wspace=0)
+for i in [0,1]:
+    axes_cbar[i] = fig.add_subplot(gc1_cbar_sub[0,i])
+    cb = plt.colorbar(im[i], cax=axes_cbar[i], orientation='horizontal',
+                      ticks=[50,100])
+    axes_cbar[i].get_xaxis().set_tick_params(labelsize=7, direction='in')
+    axes_cbar[i].get_xaxis().set_ticks_position('top')
+    axes_cbar[i].set_aspect(0.08)
+    axes_cbar[i].annotate('$\mu$Jy beam$^{-1}$', (0.71,1.4),xycoords='axes fraction',
+                        fontsize=7)
+axes_cbar[0].set_title('GMC resolution', fontsize=12)
+axes_cbar[1].set_title('YMC resolution (0.11")', fontsize=12)
+
+gc2 = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=3, subplot_spec=gc_main[1],
                                        hspace=0.1, wspace=0.18)
+im = {}
 for i, cluster in enumerate(clusters_unresolved):
     filename = imageDir+cluster+'_band3'+'_GMC'+'.fits'
     wcs, band3_data = fits_import(filename)
     ax = fig.add_subplot(gc2[i], projection=wcs)
-    ax.imshow(band3_data, origin='lower', vmin=2.8e-5, vmax=1.4e-4)
+    im[i] = ax.imshow(band3_data*1e6, origin='lower', 
+                    vmin=2.8e-5*1e6, vmax=1.4e-4*1e6)
 
     # overlay contours
     filename = imageDir+cluster+'_band6'+'_GMC'+'.fits'
@@ -231,8 +254,11 @@ for i, cluster in enumerate(clusters_unresolved):
     lon = ax.coords[0]
     lat = ax.coords[1]
     ax.tick_params(labelsize=3, direction='in')
-    lon.set_axislabel('J2000 R.A.', fontsize=10)
-    if i == 0:
+    if i in [3,4]:
+        lon.set_axislabel('J2000 R.A.', fontsize=10)
+    else:
+        lon.set_axislabel(' ')
+    if i%2 == 0:
         lat.set_axislabel('J2000 Dec.', fontsize=10)
     else:
         lat.set_axislabel(' ')
@@ -241,8 +267,23 @@ for i, cluster in enumerate(clusters_unresolved):
     anno_opts = dict(xy=(0.1, 0.9), xycoords='axes fraction',
              va='center', ha='center', color='white', fontsize=20)
     ax.annotate(cluster, **anno_opts)
+
+# add the colorbar for second aspect
+gc2_cbar = gridspec.GridSpecFromSubplotSpec(ncols=2, nrows=1, subplot_spec=gc_cbar[1],
+                                       wspace=0.18)
+axes_cbar = {}
+for i in [0,1]:
+    axes_cbar[i] = fig.add_subplot(gc2_cbar[0,i])
+    cb = plt.colorbar(im[i], cax=axes_cbar[i], orientation='horizontal',
+                      ticks=[50,100])
+    axes_cbar[i].get_xaxis().set_ticks_position('top')
+    axes_cbar[i].get_xaxis().set_tick_params(labelsize=7, direction='in')
+    axes_cbar[i].set_aspect(0.08)
+    axes_cbar[i].annotate('$\mu$Jy beam$^{-1}$', (0.71,1.4),xycoords='axes fraction',
+                        fontsize=7)
+    axes_cbar[i].set_title('GMC resolution', fontsize=12)
 # plt.show()
 # fig.tight_layout()
-plt.savefig(picDir+'cluster_summary_rest.pdf', bbox_inches='tight', pad_inches=0.4)
+plt.savefig(picDir+'cluster_summary_rest_v1.pdf', bbox_inches='tight', pad_inches=0.4)
 
 
