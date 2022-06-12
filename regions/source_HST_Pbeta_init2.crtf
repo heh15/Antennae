@@ -1,0 +1,13 @@
+#CRTFv0 CASA Region Text Format version 0
+ellipse [[180.47899635deg, -18.88495603deg], [0.4329arcsec, 0.4329arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47745993deg, -18.88423032deg], [0.3390arcsec, 0.3390arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47317554deg, -18.88595343deg], [0.2379arcsec, 0.2379arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47298782deg, -18.88618177deg], [0.5059arcsec, 0.5059arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48065951deg, -18.88038888deg], [0.3397arcsec, 0.3397arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48031644deg, -18.88014506deg], [0.3124arcsec, 0.3124arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48105820deg, -18.87938901deg], [0.2526arcsec, 0.2526arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47813783deg, -18.87540419deg], [0.3252arcsec, 0.3252arcsec], 265.00021023deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.46722692deg, -18.87245096deg], [0.3062arcsec, 0.3062arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47109673deg, -18.86834663deg], [0.2699arcsec, 0.2699arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47092744deg, -18.86731081deg], [0.4752arcsec, 0.4752arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47745601deg, -18.86572205deg], [0.3096arcsec, 0.3096arcsec], 90.00000250deg] coord=ICRS, linewidth=2, linestyle=-, symsize=1, symthick=1, color=2ee6d6, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false

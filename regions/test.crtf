@@ -1,0 +1,10 @@
+#CRTFv0 CASA Region Text Format version 0
+ellipse [[180.47811406deg, -18.87537681deg], [0.2663arcsec, 0.2056arcsec], 80.20873759deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47896702deg, -18.88499073deg], [0.2077arcsec, 0.1889arcsec], 16.32336232deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=db3737, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47745156deg, -18.88420395deg], [0.3836arcsec, 0.2377arcsec], 20.83555604deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48064594deg, -18.88035805deg], [0.2872arcsec, 0.1881arcsec], 333.73364262deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48107787deg, -18.87934617deg], [0.1789arcsec, 0.1711arcsec], 281.55581691deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47912672deg, -18.88489409deg], [0.2199arcsec, 0.1617arcsec], 43.55032001deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=db3737, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47314927deg, -18.88589397deg], [0.2918arcsec, 0.2121arcsec], 77.79585032deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47296473deg, -18.88618544deg], [0.2737arcsec, 0.1873arcsec], 58.85965628deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48033474deg, -18.88012353deg], [0.2253arcsec, 0.2009arcsec], 323.85975723deg] coord=ICRS, corr=[I], linewidth=1, linestyle=-, symsize=1, symthick=1, color=green, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false

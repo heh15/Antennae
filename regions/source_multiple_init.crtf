@@ -1,0 +1,9 @@
+#CRTFv0 CASA Region Text Format version 0
+ellipse [[180.47912165deg, -18.88489821deg], [0.0748arcsec, 0.0771arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47914839deg, -18.88487553deg], [0.0561arcsec, 0.0654arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47746197deg, -18.88418631deg], [0.0511arcsec, 0.0582arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47298474deg, -18.88616878deg], [0.0425arcsec, 0.0425arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47297048deg, -18.88619112deg], [0.0395arcsec, 0.0410arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.48065354deg, -18.88037424deg], [0.0647arcsec, 0.0697arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47813116deg, -18.87537675deg], [0.0485arcsec, 0.0517arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false
+ellipse [[180.47809987deg, -18.87539290deg], [0.0484arcsec, 0.0484arcsec], 0.00000000deg] coord=ICRS, corr=[I], linewidth=2, linestyle=-, symsize=1, symthick=1, color=d13913, font=Helvetica, fontsize=10, fontstyle=bold, usetex=false

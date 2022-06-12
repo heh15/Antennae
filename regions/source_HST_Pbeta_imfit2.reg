@@ -1,0 +1,15 @@
+# Region file format: DS9 CARTA 2.0.0
+global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1
+fk5
+ellipse(180.478987, -18.884956, 0.3163", 0.2634", 41.06218) # color=red width=1
+ellipse(180.477434, -18.884227, 0.3227", 0.2542", 5.840271) # color=red width=1
+ellipse(180.473166, -18.885960, 0.4229", 0.3092", 103.353935) # color=red width=1
+ellipse(180.472979, -18.886175, 0.2968", 0.2742", 155.934) # color=red width=1
+ellipse(180.480656, -18.880386, 0.2584", 0.2150", 85.11755) # color=red width=1
+ellipse(180.480317, -18.880142, 0.2565", 0.2359", 91.11703) # color=red width=1
+ellipse(180.481068, -18.879384, 0.2516", 0.2316", 130.3572) # color=red width=1
+ellipse(180.478138, -18.875402, 0.2159", 0.1994", 147.30981) # color=red width=1
+ellipse(180.467219, -18.872445, 0.2226", 0.2036", 120.94861) # color=red width=1
+ellipse(180.471086, -18.868348, 0.6474", 0.4224", 119.04779) # color=red width=1
+ellipse(180.470914, -18.867314, 0.4085", 0.3279", 109.50058) # color=red width=1
+ellipse(180.477434, -18.865713, 0.2803", 0.2246", 37.521973) # color=red width=1
