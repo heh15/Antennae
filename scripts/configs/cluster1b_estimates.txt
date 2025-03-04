@@ -1,0 +1,3 @@
+# peak intensity must be in map units
+4.3e-4, 2810, 1824, 0.05arcsec, 0.05arcsec, 0deg
+1.75e-4, 2805, 1830, 0.05arcsec, 0.05arcsec, 0deg
